@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RyzTech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --ink:#0A0E27;
+  --blue:#1E3FFF;
+  --blue-dark:#0B1A7A;
+  --yellow:#FFD400;
+  --yellow-deep:#FFB800;
+  --white:#FFFFFF;
+  --paper:#F4F5FB;
+  --radius:14px;
+  --shadow-hard:4px 4px 0 var(--ink);
+  --shadow-hard-lg:7px 7px 0 var(--ink);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html{scroll-behavior:smooth;overflow-x:clip;max-width:100%;}
+body{
+  margin:0;
+  font-family:'Space Grotesk',sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  background-image:radial-gradient(circle, rgba(30,63,255,0.10) 1.2px, transparent 1.2px);
+  background-size:22px 22px;
+  overflow-x:clip;
+  max-width:100%;
+}
+::selection{background:transparent;color:inherit;}
+input{-webkit-user-select:text;user-select:text;}
+input::selection{background:var(--yellow);color:var(--ink);}
+img,svg{-webkit-user-drag:none;}
+h1,h2,h3{font-family:'Titan One','Arial Black',sans-serif;letter-spacing:0;margin:0;line-height:1.1;}
+p{line-height:1.55;}
+a{color:inherit;}
+img{max-width:100%;display:block;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px;}
+
+.scanlines{
+  position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:repeating-linear-gradient(0deg, rgba(10,14,39,0.03) 0px, rgba(10,14,39,0.03) 1px, transparent 1px, transparent 3px);
+}
+
+header{position:sticky;top:0;z-index:50;background:var(--white);border-bottom:3px solid var(--ink);}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:16px;}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Titan One','Arial Black',sans-serif;font-size:22px;}
+.logo .bolt{
+  width:34px;height:34px;background:var(--yellow);border:3px solid var(--ink);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;transform:rotate(-6deg);
+  box-shadow:3px 3px 0 var(--ink);overflow:hidden;padding:0;
+}
+.logo .bolt svg{width:18px;height:18px;}
+.logo .bolt .ryz-logo{width:100%;height:100%;background-size:cover;}
+.wordmark span{color:var(--yellow);-webkit-text-stroke:4px var(--ink);paint-order:stroke fill;stroke-linejoin:round;}
+.wordmark .w-tech{margin-left:2px;}
+nav.main-nav{display:flex;gap:26px;font-weight:600;font-size:15px;}
+nav.main-nav a{text-decoration:none;position:relative;padding:4px 0;}
+nav.main-nav a::after{
+  content:"";position:absolute;left:0;bottom:-2px;width:0;height:3px;background:var(--yellow);
+  transition:width .3s var(--ease);
+}
+@media (hover:hover){nav.main-nav a:hover::after{width:100%;}}
+.btn{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--ink);
+  border:3px solid var(--ink);border-radius:10px;padding:10px 18px;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  box-shadow:var(--shadow-hard);transition:transform .28s var(--ease), box-shadow .28s var(--ease), background-color .25s ease;
+  background:var(--white);white-space:nowrap;
+}
+@media (hover:hover){.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}}
+.btn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink);transition-duration:.12s;}
+.btn-wa{background:var(--yellow);}
+.btn svg{width:16px;height:16px;flex:none;}
+#heroWaBtn svg,#ctaWaBtn svg{color:#25D366;}
+
+.hero{
+  position:relative;padding:72px 20px 0;overflow:hidden;
+  border-bottom:3px solid var(--ink);background:var(--blue);color:var(--white);
+}
+.hero-dots{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle, rgba(255,255,255,.2) 1.6px, transparent 1.6px);background-size:18px 18px;
+}
+.hero-watermark,.band-mark{
+  position:absolute;pointer-events:none;white-space:nowrap;line-height:1;
+  font-family:'Titan One','Arial Black',sans-serif;
+  color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.16);
+}
+.hero-watermark{left:50%;bottom:-.2em;transform:translateX(-50%);z-index:0;font-size:clamp(110px,24vw,300px);}
+.band-mark{left:50%;top:-2px;transform:translate(-50%,-50%);z-index:0;font-size:clamp(52px,17vw,96px);}
+.hero-burst{position:absolute;z-index:0;pointer-events:none;}
+.hero-burst-a{top:-70px;right:-60px;width:260px;height:260px;transform:rotate(12deg);}
+.hero-burst-b{bottom:150px;left:-46px;width:120px;height:120px;transform:rotate(-14deg);}
+.hero-inner{position:relative;z-index:1;max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;}
+.hero-inner>*{min-width:0;}
+.hero-copy,.hero-stage,.stage-card{max-width:100%;}
+.eyebrow-tag{
+  display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--yellow);
+  font-weight:700;font-size:13px;padding:7px 14px;border-radius:100px;margin-bottom:20px;
+}
+.eyebrow-tag .dot{width:7px;height:7px;background:var(--yellow);border-radius:50%;box-shadow:0 0 8px var(--yellow);}
+.hero h1{
+  font-size:clamp(38px,6vw,68px);color:var(--white);
+  -webkit-text-stroke:6px var(--ink);paint-order:stroke fill;stroke-linejoin:round;
+}
+.hero h1 .stroke{color:var(--yellow);}
+.hero h1,.hero p.lead{overflow-wrap:anywhere;}
+.hero p.lead{font-size:17px;max-width:500px;margin:20px 0 30px;color:#e3e8ff;}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;}
+.hero-stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px;}
+.stat-chip{
+  background:var(--paper);color:var(--ink);border:2.5px solid var(--ink);border-radius:10px;padding:10px;
+  box-shadow:3px 3px 0 var(--ink);min-width:110px;text-align:center;
+}
+.stat-chip b{display:block;font-family:'Titan One','Arial Black',sans-serif;font-size:clamp(14px,4.3vw,21px);white-space:nowrap;color:var(--blue);}
+.stat-chip span{font-size:11.5px;font-weight:600;color:#555b7a;}
+
+.hero-stage{position:relative;padding:30px 0 8px;}
+.stage-card{
+  position:relative;background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:22px;
+  box-shadow:var(--shadow-hard-lg);padding:22px 18px 18px;transform:rotate(1.5deg);transition:transform .5s var(--ease);
+}
+@media (hover:hover){.stage-card:hover{transform:rotate(0deg);}}
+.stage-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.stage-badge{
+  background:var(--yellow);border:2.5px solid var(--ink);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;
+  box-shadow:2.5px 2.5px 0 var(--ink);transform:rotate(-2deg);position:relative;top:-3px;
+}
+.eq{display:flex;align-items:flex-end;gap:var(--gap);height:var(--eq-h);}
+.eq span{
+  display:block;width:var(--bar);height:100%;background:var(--eq-color);border-radius:0;
+  transform-origin:50% 100%;transform:scaleY(var(--h));will-change:transform;
+  animation:eqRise .3s var(--ease) both, eq .9s ease-in-out calc(.3s + var(--d)) infinite;
+}
+.eq span:nth-child(1){--h:.4;--d:0s;}
+.eq span:nth-child(2){--h:1;--d:.15s;}
+.eq span:nth-child(3){--h:.65;--d:.3s;}
+.eq span:nth-child(4){--h:.9;--d:.45s;}
+.eq span:nth-child(5){--h:.5;--d:.6s;}
+.eq.paused span{animation:none;transform:scaleY(var(--line-s));transition:transform .55s cubic-bezier(.33,1,.68,1);}
+.stage-eq.paused span{animation:eqIdle 2.6s cubic-bezier(.45,.05,.55,.95) calc(.55s + var(--d) * 2.4) infinite;}
+.stage-eq{--eq-h:22px;--bar:5px;--gap:3px;--line-s:.0909;--eq-color:var(--blue);}
+.mini-eq{--eq-h:14px;--bar:3px;--gap:2px;--line-s:.1429;--eq-color:var(--yellow);margin-top:6px;}
+.stage-list{display:flex;flex-direction:column;gap:10px;min-height:220px;}
+.stage-row{
+  display:flex;align-items:center;gap:12px;background:var(--paper);border:2.5px solid var(--ink);
+  border-radius:12px;padding:10px 10px 10px 12px;
+}
+.stage-row.enter{animation:rowIn .55s var(--ease) both;animation-delay:calc(var(--i) * 60ms);}
+.stage-rank{
+  flex:none;width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--yellow);
+  display:flex;align-items:center;justify-content:center;font-family:'Titan One','Arial Black',sans-serif;font-size:14px;
+}
+.stage-info{flex:1;min-width:0;}
+.stage-name{font-weight:700;font-size:14px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stage-meta{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:#555b7a;margin-top:2px;}
+.stage-play{
+  flex:none;width:36px;height:36px;border-radius:50%;background:var(--blue);color:var(--white);
+  border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink);cursor:pointer;padding:0;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .28s var(--ease), box-shadow .28s var(--ease), background-color .25s ease, opacity .25s ease;
+}
+.stage-play svg{
+  position:absolute;left:50%;top:50%;width:14px;height:14px;fill:currentColor;margin:0;
+  transition:opacity .22s ease, transform .34s var(--ease);
+}
+.stage-play .ico-play{opacity:1;transform:translate(-50%,-50%) translateX(1px);}
+.stage-play .ico-pause{opacity:0;transform:translate(-50%,-50%) scale(.4);}
+.stage-play.is-playing .ico-play{opacity:0;transform:translate(-50%,-50%) scale(.4);}
+.stage-play.is-playing .ico-pause{opacity:1;transform:translate(-50%,-50%);}
+@media (hover:hover){.stage-play:not(:disabled):hover{background:var(--blue-dark);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);}}
+.stage-play:not(:disabled):active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink);transition-duration:.12s;}
+.stage-play:disabled{opacity:.45;cursor:not-allowed;}
+.stage-play.is-loading{opacity:.6;pointer-events:none;}
+.stage-empty{padding:28px 10px;text-align:center;font-weight:600;color:#555b7a;font-size:14px;}
+.stage-more{display:block;text-align:center;margin-top:14px;font-weight:700;font-size:13.5px;color:var(--blue-dark);text-decoration:none;}
+@media (hover:hover){.stage-more:hover{text-decoration:underline;}}
+.stage-trumpet{
+  position:absolute;top:-6px;left:-18px;width:100px;height:auto;z-index:2;transform:rotate(-14deg);
+  animation:ctaFloat 4s ease-in-out infinite alternate;
+}
+.stage-note{
+  position:absolute;z-index:2;fill:none;stroke:var(--yellow);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;
+  animation:ctaFloat 3.2s ease-in-out infinite alternate;
+}
+.stage-note-a{top:2px;right:26px;width:32px;height:32px;}
+.stage-note-b{bottom:-14px;left:40px;width:26px;height:26px;animation-delay:-1.6s;}
+
+.skel .bar{
+  height:11px;border-radius:6px;background:linear-gradient(90deg,#dde0f1 25%,#eceef9 50%,#dde0f1 75%);
+  background-size:200% 100%;animation:shimmer 1.2s linear infinite;
+}
+.skel .bar.short{width:45%;margin-top:7px;}
+.nada-card.skel{pointer-events:none;content-visibility:visible;}
+.skel .bar.tiny{width:44px;margin-top:0;}
+.skel .pill{
+  width:76px;height:26px;border-radius:8px;background:linear-gradient(90deg,#dde0f1 25%,#eceef9 50%,#dde0f1 75%);
+  background-size:200% 100%;animation:shimmer 1.2s linear infinite;
+}
+.skel .circle{flex:none;width:36px;height:36px;border-radius:50%;background:#dde0f1;}
+.skel .stage-rank{background:#c9cde6;color:transparent;}
+
+.hero-features-label{position:relative;z-index:1;max-width:1120px;margin:54px auto 14px;font-size:22px;color:var(--yellow);}
+.hero-features{
+  position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 0 64px;list-style:none;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;
+}
+.hero-features li{
+  display:flex;align-items:center;gap:10px;background:var(--white);color:var(--ink);border:2.5px solid var(--ink);
+  border-radius:12px;padding:12px 14px;box-shadow:3px 3px 0 var(--ink);font-size:14px;font-weight:600;
+}
+.hero-features li .ico{
+  flex:none;width:26px;height:26px;background:var(--yellow);border:2px solid var(--ink);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-features li .ico svg{width:15px;height:15px;fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.hero-features li .ico svg.solid{fill:var(--ink);stroke:none;}
+
+.brand-strip{background:var(--ink);color:var(--white);border-bottom:3px solid var(--ink);overflow:hidden;padding:11px 0;white-space:nowrap;}
+.brand-strip .track{display:inline-flex;animation:scrollx 26s linear infinite;will-change:transform;}
+.brand-strip .group{display:inline-flex;align-items:center;gap:34px;padding-right:34px;font-weight:700;font-size:13.5px;letter-spacing:1px;}
+.brand-strip .group span{color:var(--yellow);}
+.brand-strip .group i{width:6px;height:6px;border-radius:50%;background:var(--white);}
+
+.section{padding:70px 0;}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:34px;flex-wrap:wrap;}
+.section-head h2{font-size:clamp(30px,4.4vw,44px);}
+.section-head p{max-width:440px;color:#4a4f6e;font-size:14.5px;margin-top:6px;}
+.tag-badge{
+  display:inline-block;background:var(--yellow);border:2.5px solid var(--ink);border-radius:8px;
+  padding:4px 10px;font-size:12px;font-weight:700;box-shadow:2.5px 2.5px 0 var(--ink);transform:rotate(-2deg);
+  margin-bottom:14px;
+}
+
+.katalog-panel{
+  background:var(--white);border:3px solid var(--ink);border-radius:18px;box-shadow:var(--shadow-hard-lg);padding:26px;
+}
+.search-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.search-box{
+  flex:1;min-width:220px;display:flex;align-items:center;gap:10px;border:2.5px solid var(--ink);
+  border-radius:10px;padding:10px 14px;background:var(--paper);
+}
+.search-box svg{width:18px;height:18px;flex:none;opacity:.7;}
+.search-box input{
+  border:none;background:transparent;outline:none;font-family:'Space Grotesk';font-size:15px;width:100%;color:var(--ink);
+}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.tab-btn{
+  border:2.5px solid var(--ink);background:var(--white);border-radius:100px;padding:7px 15px;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink);
+  transition:transform .28s var(--ease), box-shadow .28s var(--ease), background-color .25s ease, color .25s ease;
+}
+.tab-btn.active{background:var(--blue);color:var(--white);box-shadow:3px 3px 0 var(--ink);}
+@media (hover:hover){.tab-btn:not(.active):hover{background:var(--yellow);}}
+.tab-btn:active{transform:scale(.95);transition-duration:.12s;}
+.result-count{min-height:16px;font-size:12.5px;font-weight:600;color:#666c8f;margin-bottom:12px;}
+.nada-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;
+  max-height:560px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;align-content:start;
+}
+.nada-grid::-webkit-scrollbar{width:8px;}
+.nada-grid::-webkit-scrollbar-thumb{background:var(--blue);border-radius:10px;}
+.nada-card{
+  border:2.5px solid var(--ink);border-radius:12px;padding:13px 14px;background:var(--paper);
+  display:flex;flex-direction:column;gap:8px;position:relative;
+  content-visibility:auto;contain-intrinsic-size:auto 96px;
+}
+.nada-card .top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.nada-card .name{font-weight:700;font-size:13.5px;line-height:1.3;word-break:break-word;flex:1;min-width:0;}
+.new-badge{
+  flex:none;display:inline-flex;align-items:center;border:2px solid var(--ink);background:var(--yellow);color:var(--ink);
+  border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;line-height:1.2;letter-spacing:.3px;
+}
+.new-badge.mini{padding:1px 6px;font-size:9.5px;border-width:1.5px;border-radius:6px;}
+.nada-card .card-actions{display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:8px;flex-wrap:wrap;}
+.order-link{
+  font-size:12px;font-weight:700;color:var(--blue-dark);text-decoration:none;display:flex;align-items:center;gap:5px;
+}
+@media (hover:hover){.order-link:hover{text-decoration:underline;}}
+.empty-state{grid-column:1/-1;padding:40px 10px;text-align:center;color:#777;font-size:14px;}
+
+.preview-btn{
+  border:2px solid var(--ink);background:var(--blue);color:var(--white);border-radius:8px;font-family:'Space Grotesk',sans-serif;
+  padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;
+  flex:none;transition:transform .28s var(--ease), background-color .25s ease, color .25s ease, opacity .25s ease;
+}
+.preview-btn svg{width:12px;height:12px;flex:none;}
+.preview-btn .ico-pause{display:none;}
+.preview-btn.playing .ico-play{display:none;}
+.preview-btn.playing .ico-pause{display:block;}
+@media (hover:hover){.preview-btn:not(:disabled):not(.playing):hover{background:var(--blue-dark);transform:translateY(-1px);}}
+.preview-btn:not(:disabled):active{transform:scale(.94);transition-duration:.12s;}
+.preview-btn.playing{background:var(--yellow);color:var(--ink);}
+.preview-btn:disabled{opacity:.35;cursor:not-allowed;}
+.preview-btn.is-loading{opacity:.6;pointer-events:none;}
+
+.player-widget{
+  position:fixed;right:20px;bottom:20px;z-index:80;width:320px;max-width:calc(100vw - 24px);
+  transform:translateY(140%) scale(.96);opacity:0;visibility:hidden;
+  transition:transform .55s var(--ease), opacity .35s ease, visibility 0s linear .55s;
+  pointer-events:none;will-change:transform,opacity;
+}
+.player-widget.show{
+  transform:translateY(0) scale(1);opacity:1;visibility:visible;pointer-events:auto;
+  transition:transform .55s var(--ease), opacity .35s ease, visibility 0s;
+}
+.player-widget.dragging,.player-widget.dragging *{cursor:grabbing;}
+.player-widget.dragging{transition:none;}
+.player-widget.settling{transition:transform .55s var(--ease), opacity .35s ease, visibility 0s, translate .3s var(--ease);}
+.player-widget.leaving{animation:playerFadeOut .8s cubic-bezier(.3,.1,.3,1) forwards;pointer-events:none;}
+.player-card{
+  background:var(--blue);border:3px solid var(--ink);border-radius:20px;
+  box-shadow:var(--shadow-hard-lg);padding:16px 16px 18px;position:relative;overflow:hidden;touch-action:none;cursor:grab;
+}
+.player-card::before{
+  content:"";position:absolute;inset:0;opacity:.12;pointer-events:none;
+  background-image:radial-gradient(circle, var(--white) 1.6px, transparent 1.6px);background-size:14px 14px;
+}
+.player-topbar{display:flex;align-items:center;gap:8px;position:relative;z-index:1;margin-bottom:12px;}
+.player-badge{display:flex;align-items:center;gap:7px;flex:1;min-width:0;}
+.player-badge .bolt-mini{
+  width:22px;height:22px;background:var(--yellow);border:2px solid var(--ink);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden;padding:0;isolation:isolate;
+}
+.player-badge .bolt-mini svg{width:12px;height:12px;}
+.player-badge .bolt-mini .ryz-logo{width:100%;height:100%;background-size:cover;border-radius:inherit;transform:scale(1.14);}
+.ryz-logo{display:none;background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none;}
+.logo-ready .ryz-logo{display:block;}
+.logo-ready svg{display:none;}
+.player-badge span.brand{font-family:'Titan One','Arial Black',sans-serif;font-size:14px;}
+.format-tag{
+  flex:none;background:var(--yellow);color:var(--ink);font-weight:800;font-size:10px;
+  padding:3px 8px;border-radius:6px;border:2px solid var(--ink);
+}
+.preview-close{
+  flex:none;border:2px solid var(--yellow);background:transparent;color:var(--yellow);padding:0;
+  border-radius:50%;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .28s var(--ease), background-color .25s ease, color .25s ease;
+}
+.preview-close svg{width:11px;height:11px;display:block;}
+@media (hover:hover){.preview-close:hover{background:var(--yellow);color:var(--ink);transform:rotate(90deg);}}
+.preview-close:active{transform:rotate(90deg) scale(.88);transition-duration:.12s;}
+.player-body{display:flex;gap:12px;align-items:center;position:relative;z-index:1;margin-bottom:14px;}
+.art-box{
+  flex:none;width:56px;height:56px;border-radius:12px;border:2.5px solid var(--ink);
+  background:linear-gradient(145deg, var(--yellow), var(--yellow-deep));
+  display:flex;align-items:center;justify-content:center;box-shadow:2.5px 2.5px 0 rgba(0,0,0,.35);
+}
+.art-box svg{width:30px;height:30px;color:var(--ink);}
+.track-info{min-width:0;flex:1;}
+.track-title{
+  font-family:'Titan One','Arial Black',sans-serif;color:var(--white);font-size:14px;line-height:1.3;
+  white-space:nowrap;overflow:hidden;position:relative;
+}
+.track-title.overflowing{
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);
+}
+.track-title-text{display:inline-block;white-space:nowrap;will-change:transform;}
+.track-sub{color:#cfd8ff;font-size:11px;font-weight:600;margin-top:3px;letter-spacing:.5px;}
+
+.seek-row{display:flex;align-items:center;gap:8px;position:relative;z-index:1;margin-bottom:14px;}
+.time-label{color:#cfd8ff;font-size:10.5px;font-weight:700;flex:none;width:30px;}
+.time-label.right{text-align:right;}
+.seek-track{
+  flex:1;height:8px;background:rgba(255,255,255,.25);border:2px solid var(--ink);border-radius:100px;
+  position:relative;cursor:pointer;touch-action:none;
+}
+.seek-track::before{content:"";position:absolute;left:-8px;right:-8px;top:-12px;bottom:-12px;}
+.seek-fill{
+  position:absolute;left:0;top:0;bottom:0;border-radius:100px;background:var(--yellow);
+  width:calc(9px + (100% - 18px) * var(--p, 0) / 100);
+}
+.seek-thumb{
+  position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--yellow);
+  border:2px solid var(--ink);box-shadow:1.5px 1.5px 0 rgba(0,0,0,.3);pointer-events:none;
+  left:calc(9px + (100% - 18px) * var(--p, 0) / 100);
+  transform:translate(-50%,-50%);transition:transform .25s var(--ease), box-shadow .25s var(--ease);
+  will-change:left;
+}
+@media (hover:hover){.seek-track:hover .seek-thumb{transform:translate(-50%,-50%) scale(1.12);}}
+.seek-track.dragging .seek-thumb{transform:translate(-50%,-50%) scale(1.25);box-shadow:3px 3px 0 rgba(0,0,0,.4);}
+.control-row{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+.big-play-btn{
+  flex:none;background:var(--yellow);border:3px solid var(--ink);border-radius:12px;
+  padding:10px 20px;font-family:'Titan One','Arial Black',sans-serif;font-size:13px;color:var(--ink);
+  cursor:pointer;box-shadow:3.5px 3.5px 0 var(--ink);display:flex;align-items:center;justify-content:center;gap:7px;
+  min-width:112px;transition:transform .28s var(--ease), box-shadow .28s var(--ease);
+}
+@media (hover:hover){.big-play-btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink);}}
+.big-play-btn:active{transform:translate(1px,1px);box-shadow:1.5px 1.5px 0 var(--ink);transition-duration:.12s;}
+.bp-icon{position:relative;width:14px;height:14px;flex:none;}
+.bp-icon svg{position:absolute;left:0;top:0;width:14px;height:14px;transition:opacity .22s ease, transform .34s var(--ease);}
+.bp-icon .ico-play{opacity:1;transform:none;}
+.bp-icon .ico-pause{opacity:0;transform:scale(.4) rotate(-45deg);}
+.big-play-btn.is-playing .ico-play{opacity:0;transform:scale(.4) rotate(45deg);}
+.big-play-btn.is-playing .ico-pause{opacity:1;transform:none;}
+.bp-label{display:inline-grid;justify-items:center;}
+.bp-label span{grid-area:1/1;transition:opacity .22s ease, transform .34s var(--ease);}
+.bp-label .lbl-pause{opacity:0;transform:translateY(5px);}
+.big-play-btn.is-playing .lbl-play{opacity:0;transform:translateY(-5px);}
+.big-play-btn.is-playing .lbl-pause{opacity:1;transform:none;}
+.volume-box{display:flex;align-items:center;gap:7px;flex:1;min-width:0;}
+.volume-box span{color:#cfd8ff;font-size:10px;font-weight:800;letter-spacing:.5px;flex:none;}
+.volume-box input[type="range"]{flex:1;min-width:0;accent-color:var(--yellow);height:4px;cursor:pointer;}
+.status-label{
+  text-align:center;color:#9fb0ff;font-size:9.5px;font-weight:700;letter-spacing:1.5px;
+  margin-top:12px;position:relative;z-index:1;text-transform:uppercase;
+}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:99;
+  background:var(--ink);color:var(--yellow);font-weight:700;padding:12px 22px;border-radius:10px;
+  border:2.5px solid var(--yellow);box-shadow:0 6px 22px rgba(0,0,0,.35);opacity:0;pointer-events:none;
+  transition:opacity .35s ease, transform .45s var(--ease);font-size:13.5px;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+#katalog,#kontak{scroll-margin-top:84px;}
+.cta-final{padding:64px 20px 96px;text-align:center;}
+.cta-card{
+  position:relative;max-width:780px;margin:0 auto;background:var(--blue);border:3px solid var(--ink);
+  border-radius:22px;box-shadow:var(--shadow-hard-lg);padding:46px 24px 42px;color:var(--white);
+}
+.cta-card::before{
+  content:"";position:absolute;inset:0;border-radius:19px;pointer-events:none;
+  background-image:radial-gradient(circle, rgba(255,255,255,.22) 1.6px, transparent 1.6px);background-size:16px 16px;
+}
+.cta-inner{position:relative;z-index:1;}
+.cta-final h2{font-size:clamp(26px,4.6vw,44px);margin-bottom:22px;color:var(--white);}
+.cta-final h2 .hl{color:var(--yellow);}
+.cta-card .tag-badge{color:var(--ink);}
+.cta-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 30px;}
+.cta-chips span{
+  display:inline-flex;align-items:center;gap:7px;background:var(--white);color:var(--ink);border:2.5px solid var(--ink);
+  border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;box-shadow:3px 3px 0 var(--ink);
+}
+.cta-chips span:nth-child(odd){transform:rotate(-2deg);}
+.cta-chips span:nth-child(even){transform:rotate(2deg);}
+.cta-chips svg{width:16px;height:16px;fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none;}
+.cta-btn{position:relative;font-size:16px;padding:14px 26px;}
+.cta-btn svg{width:20px;height:20px;}
+.cta-btn::after{
+  content:"";position:absolute;inset:-3px;border-radius:12px;border:3px solid var(--yellow);pointer-events:none;
+  animation:ctaRing 1.9s ease-out infinite;
+}
+.cta-burst{position:absolute;pointer-events:none;animation:ctaFloat 4s ease-in-out infinite alternate;}
+.cta-burst-a{width:64px;height:64px;top:-26px;left:-18px;transform:rotate(-12deg);}
+.cta-burst-b{width:42px;height:42px;top:-14px;right:-12px;transform:rotate(14deg);animation-delay:-2s;}
+
+footer{background:var(--ink);color:#c7cbe8;padding:34px 20px;border-top:3px solid var(--ink);}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;max-width:1120px;margin:0 auto;}
+.footer-inner .logo{color:var(--white);}
+footer small{font-size:12px;color:#8890b8;}
+
+.float-wa{
+  position:fixed;right:20px;bottom:20px;z-index:60;
+  width:58px;height:58px;border-radius:50%;background:var(--yellow);border:3px solid var(--ink);
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-hard);cursor:pointer;
+  text-decoration:none;transition:transform .28s var(--ease), box-shadow .28s var(--ease), opacity .3s ease, visibility 0s;
+}
+body.player-open .float-wa{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease, visibility 0s linear .3s;}
+.float-wa svg{width:26px;height:26px;}
+@media (hover:hover){.float-wa:hover{transform:translateY(-3px);box-shadow:6px 6px 0 var(--ink);}}
+.float-wa:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink);transition-duration:.12s;}
+
+@keyframes eqRise{
+  from{transform:scaleY(var(--line-s));}
+  to{transform:scaleY(calc(var(--h) * .4));}
+}
+@keyframes eqIdle{
+  0%,100%{translate:0 0;scale:1 1;animation-timing-function:cubic-bezier(.45,.05,.55,.95);}
+  50%{translate:0 -3.5px;scale:1 1.7;animation-timing-function:cubic-bezier(.45,.05,.55,.95);}
+}
+@keyframes eq{
+  0%,100%{transform:scaleY(calc(var(--h) * .4));}
+  50%{transform:scaleY(var(--h));}
+}
+@keyframes scrollx{from{transform:translateX(0);}to{transform:translateX(var(--strip-shift,-100%));}}
+@keyframes ctaRing{0%{opacity:.9;transform:scale(1);}100%{opacity:0;transform:scale(1.14,1.5);}}
+@keyframes ctaFloat{from{translate:0 0;}to{translate:0 -6px;}}
+@keyframes rowIn{from{opacity:0;transform:translateY(-14px) scale(.97);}to{opacity:1;transform:none;}}
+@keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+@keyframes playerFadeOut{
+  0%{opacity:1;transform:translateY(0) scale(1);}
+  30%{opacity:.45;transform:translateY(0) scale(1);}
+  45%{opacity:.4;transform:translateY(-10px) scale(1);}
+  100%{opacity:0;transform:translateY(140%) scale(.96);}
+}
+
+@media (max-width:900px){
+  nav.main-nav{display:none;}
+  .hero-inner{grid-template-columns:1fr;gap:34px;}
+  .stage-card{transform:none;}
+  .hero-copy{text-align:center;}
+  .hero p.lead{margin-left:auto;margin-right:auto;}
+  .hero-cta,.hero-stats{justify-content:center;}
+  .hero-cta .btn{flex:1 1 auto;justify-content:center;white-space:normal;text-align:center;}
+  .hero-stats .stat-chip{flex:1 1 90px;min-width:0;}
+  .hero-features-label{text-align:center;}
+  .hero-features{grid-template-columns:1fr;}
+  .hero-stage{margin:0 auto;width:100%;}
+}
+@media (max-width:640px){
+  .player-widget{right:12px;bottom:12px;width:calc(100vw - 24px);}
+}
+@media (max-width:560px){
+  .hero{padding:56px 16px 0;}
+  .hero-burst-b{display:none;}
+  .stage-trumpet{width:84px;left:0;}
+  .hero-features{padding-bottom:48px;}
+  .hero p.lead{max-width:100%;}
+  .section{padding:50px 0;}
+  .nada-grid{grid-template-columns:1fr;max-height:460px;}
+  .header-inner{padding:12px 14px;}
+  .cta-card{padding:42px 18px 38px;}
+  .cta-chips span{font-size:12px;padding:5px 12px;}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  .eq span,.eq.paused span,.stage-trumpet,.stage-note,.cta-btn::after,.cta-burst,.stage-row.enter,.skel .bar,.skel .pill{animation:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="bolt" data-logo>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14H11L9 22L21 8H13L13 2Z" fill="#0A0E27"/></svg><span class="ryz-logo"></span>
+      </div>
+      <span class="wordmark"><span class="w-ryz">RYZ</span><span class="w-tech">TECH</span></span>
+    </div>
+    <nav class="main-nav">
+      <a href="#katalog">Katalog Nada</a>
+      <a href="#kontak">Kontak</a>
+    </nav>
+    <a class="btn btn-wa" id="headerWaBtn" href="https://wa.me/6289603283962?text=Halo%20min%2C%20saya%20mau%20tanya-tanya%20soal%20nada%20nya" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.18-1.77 1.24-.45.06-1.01.08-1.63-.1-.38-.11-.86-.28-1.48-.55-2.6-1.12-4.3-3.73-4.43-3.9-.13-.17-1.06-1.41-1.06-2.69s.68-1.9.92-2.16c.24-.26.52-.32.7-.32h.5c.16 0 .38-.02.58.44.22.51.75 1.77.82 1.9.07.13.11.28.02.45-.09.17-.13.28-.26.43-.13.15-.28.34-.4.46-.13.13-.27.27-.12.53.15.26.66 1.09 1.42 1.77.98.87 1.8 1.14 2.06 1.27.26.13.41.11.56-.07.16-.17.65-.76.82-1.02.17-.26.34-.22.57-.13.24.09 1.5.71 1.75.83.26.13.43.19.49.3.06.11.06.62-.16 1.23z"/></svg>
+      Pesan
+    </a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-watermark">BASURI</div>
+  <svg class="hero-burst hero-burst-a" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><polygon points="100,0 118,72 190,60 138,110 172,178 100,140 28,178 62,110 10,60 82,72" fill="#FFD400" stroke="#0A0E27" stroke-width="3"/></svg>
+  <svg class="hero-burst hero-burst-b" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><polygon points="100,0 118,72 190,60 138,110 172,178 100,140 28,178 62,110 10,60 82,72" fill="#FFD400" stroke="#0A0E27" stroke-width="5"/></svg>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="eyebrow-tag"><span class="dot"></span>Buka 24 Jam - Fast Response</div>
+      <h1>Nada MIDI <span class="stroke">Siap Pakai,</span> Tinggal Pasang &amp; Main!</h1>
+      <p class="lead">Temukan nada lagu basuri 12-60 not mulai dari harga terjangkau hingga pilihan terbaik! Tersedia dalam format FLM &amp; MIDI, bisa request lagu dan turunan nada di C tertentu sesuai kebutuhan. Tinggal pilih, beli, pasang, dan langsung gas!</p>
+      <div class="hero-cta">
+        <a class="btn btn-wa" id="heroWaBtn" href="https://wa.me/6289603283962?text=Halo%20min%2C%20saya%20mau%20tanya-tanya%20soal%20nada%20nya" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.18-1.77 1.24-.45.06-1.01.08-1.63-.1-.38-.11-.86-.28-1.48-.55-2.6-1.12-4.3-3.73-4.43-3.9-.13-.17-1.06-1.41-1.06-2.69s.68-1.9.92-2.16c.24-.26.52-.32.7-.32h.5c.16 0 .38-.02.58.44.22.51.75 1.77.82 1.9.07.13.11.28.02.45-.09.17-.13.28-.26.43-.13.15-.28.34-.4.46-.13.13-.27.27-.12.53.15.26.66 1.09 1.42 1.77.98.87 1.8 1.14 2.06 1.27.26.13.41.11.56-.07.16-.17.65-.76.82-1.02.17-.26.34-.22.57-.13.24.09 1.5.71 1.75.83.26.13.43.19.49.3.06.11.06.62-.16 1.23z"/></svg>
+          Pesan via WhatsApp
+        </a>
+        <a class="btn" href="#katalog">Lihat Katalog Nada</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-chip"><b id="statTotal">0</b><span>Nada tersedia</span></div>
+        <div class="stat-chip"><b>12-60</b><span>Pilihan NOT</span></div>
+        <div class="stat-chip"><b>FLM/MID</b><span>Format file</span></div>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <span class="band-mark" aria-hidden="true">RYZTECH</span>
+      <svg class="stage-trumpet" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 42H80M26 42V20H72V42" fill="none" stroke="#0A0E27" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 42H80M26 42V20H72V42" fill="none" stroke="#FFD400" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <polygon points="80,42 114,16 114,68" fill="#FFD400" stroke="#0A0E27" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M42 42V60M56 42V60" stroke="#0A0E27" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="42" cy="63" r="4" fill="#FFD400" stroke="#0A0E27" stroke-width="3"/>
+        <circle cx="56" cy="63" r="4" fill="#FFD400" stroke="#0A0E27" stroke-width="3"/>
+      </svg>
+      <svg class="stage-note stage-note-a" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+      <svg class="stage-note stage-note-b" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+      <div class="stage-card">
+        <div class="stage-top">
+          <span class="stage-badge">Nada Basuri Terbaru</span>
+          <div class="eq stage-eq paused" id="heroEq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="stage-list" id="heroList"></div>
+        <a class="stage-more" href="#katalog">Lihat semua nada</a>
+      </div>
+    </div>
+  </div>
+  <h3 class="hero-features-label">Tersedia dalam:</h3>
+  <ul class="hero-features">
+    <li><span class="ico"><svg viewBox="0 0 24 24"><path d="M2 12h12"/><path d="M14 12l7-5v10z"/><path d="M5 12V8h7v4"/><path d="M8 12v4M11 12v4"/></svg></span>12, 24, 36, 48, 54, 60 NOT</li>
+    <li><span class="ico"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="10" y="10" width="4" height="4"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg></span>C1 / C2 / C3 / C4 / C5</li>
+    <li><span class="ico"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span>File FLM / MIDI</li>
+    <li><span class="ico"><svg class="solid" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>Bisa preview / dengar nada langsung di web</li>
+  </ul>
+</section>
+
+<div class="brand-strip">
+  <div class="track">
+    <div class="group"><span>OKDJ</span><i></i><span>AZK</span><i></i><span>SINYO</span><i></i><span>ZETA</span><i></i><span>RYZ</span><i></i><span>BKH</span><i></i></div>
+  </div>
+</div>
+
+<section class="section" id="katalog">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag-badge">Katalog Lengkap</span>
+        <h2>Cari nama lagu yang kamu mau di sini</h2>
+        <p>Cari nada lagu favoritmu di sini...</p>
+      </div>
+    </div>
+    <div class="katalog-panel">
+      <div class="search-row">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0A0E27" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="Cari judul lagu, contoh: janda bodong, coffin dance..." autocomplete="off" spellcheck="false" enterkeyhint="search">
+        </div>
+      </div>
+      <div class="tabs" id="tabRow"></div>
+      <div class="result-count" id="resultCount"></div>
+      <div class="nada-grid" id="nadaGrid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-final" id="kontak">
+  <div class="cta-card">
+    <svg class="cta-burst cta-burst-a" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><polygon points="100,0 118,72 190,60 138,110 172,178 100,140 28,178 62,110 10,60 82,72" fill="#FFD400" stroke="#0A0E27" stroke-width="6"/></svg>
+    <svg class="cta-burst cta-burst-b" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><polygon points="100,0 118,72 190,60 138,110 172,178 100,140 28,178 62,110 10,60 82,72" fill="#FFD400" stroke="#0A0E27" stroke-width="6"/></svg>
+    <div class="cta-inner">
+      <span class="tag-badge">Kontak Admin</span>
+      <h2>Mau tanya atau request nada? Langsung <span class="hl">chat admin</span> aja!</h2>
+      <div class="cta-chips">
+        <span><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Request lagu</span>
+        <span><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="10" y="10" width="4" height="4"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg>Turunan nada C1 / C2 / C3</span>
+        <span><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Format FLM / MIDI</span>
+      </div>
+      <a class="btn btn-wa cta-btn" id="ctaWaBtn" href="https://wa.me/6289603283962?text=Halo%20min%2C%20saya%20mau%20tanya-tanya%20soal%20nada%20nya" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.18-1.77 1.24-.45.06-1.01.08-1.63-.1-.38-.11-.86-.28-1.48-.55-2.6-1.12-4.3-3.73-4.43-3.9-.13-.17-1.06-1.41-1.06-2.69s.68-1.9.92-2.16c.24-.26.52-.32.7-.32h.5c.16 0 .38-.02.58.44.22.51.75 1.77.82 1.9.07.13.11.28.02.45-.09.17-.13.28-.26.43-.13.15-.28.34-.4.46-.13.13-.27.27-.12.53.15.26.66 1.09 1.42 1.77.98.87 1.8 1.14 2.06 1.27.26.13.41.11.56-.07.16-.17.65-.76.82-1.02.17-.26.34-.22.57-.13.24.09 1.5.71 1.75.83.26.13.43.19.49.3.06.11.06.62-.16 1.23z"/></svg>
+        Chat Admin
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="logo"><span class="wordmark"><span class="w-ryz">RYZ</span><span class="w-tech">TECH</span></span></div>
+    <small>&copy; 2026 &bull; PROPERTY BY RYZ TECH</small>
+  </div>
+</footer>
+
+<a class="float-wa" id="floatWaBtn" href="https://wa.me/6289603283962?text=Halo%20min%2C%20saya%20mau%20tanya-tanya%20soal%20nada%20nya" target="_blank" rel="noopener" aria-label="Chat WhatsApp">
+  <svg viewBox="0 0 24 24" fill="#0A0E27"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.18-1.77 1.24-.45.06-1.01.08-1.63-.1-.38-.11-.86-.28-1.48-.55-2.6-1.12-4.3-3.73-4.43-3.9-.13-.17-1.06-1.41-1.06-2.69s.68-1.9.92-2.16c.24-.26.52-.32.7-.32h.5c.16 0 .38-.02.58.44.22.51.75 1.77.82 1.9.07.13.11.28.02.45-.09.17-.13.28-.26.43-.13.15-.28.34-.4.46-.13.13-.27.27-.12.53.15.26.66 1.09 1.42 1.77.98.87 1.8 1.14 2.06 1.27.26.13.41.11.56-.07.16-.17.65-.76.82-1.02.17-.26.34-.22.57-.13.24.09 1.5.71 1.75.83.26.13.43.19.49.3.06.11.06.62-.16 1.23z"/></svg>
+</a>
+
+<div class="player-widget" id="previewBar">
+  <div class="player-card">
+    <div class="player-topbar">
+      <div class="player-badge">
+        <div class="bolt-mini" data-logo>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14H11L9 22L21 8H13L13 2Z" fill="#0A0E27"/></svg><span class="ryz-logo"></span>
+        </div>
+        <span class="brand wordmark"><span class="w-ryz">RYZ</span><span class="w-tech">TECH</span></span>
+      </div>
+      <span class="format-tag">MIDI</span>
+      <button class="preview-close" id="previewClose" type="button" aria-label="Tutup preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </div>
+    <div class="player-body">
+      <div class="art-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17V6l11-2v11"/><path d="M9 10l11-2"/><circle cx="6.5" cy="17.5" r="2.7" fill="currentColor"/><circle cx="17.5" cy="15.5" r="2.7" fill="currentColor"/></svg>
+      </div>
+      <div class="track-info">
+        <div class="track-title" id="titleBox"><span class="track-title-text" id="previewTitle">-</span></div>
+        <div class="track-sub">RYZTECH &bull; MIDI</div>
+        <div class="eq mini-eq paused" id="miniEq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="seek-row">
+      <span class="time-label" id="timeNow">0:00</span>
+      <div class="seek-track" id="seekTrack"><div class="seek-fill"></div><div class="seek-thumb"></div></div>
+      <span class="time-label right" id="timeTotal">0:00</span>
+    </div>
+    <div class="control-row">
+      <button class="big-play-btn" id="bigPlayBtn" type="button">
+        <span class="bp-icon">
+          <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+        </span>
+        <span class="bp-label"><span class="lbl-play">Play</span><span class="lbl-pause">Pause</span></span>
+      </button>
+      <div class="volume-box">
+        <span>VOL</span>
+        <input type="range" id="volSlider" min="-40" max="0" value="-6" step="1">
+      </div>
+    </div>
+    <div class="status-label" id="statusLabel">Tap play to start</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WA_NUMBER = "6289603283962";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDpRllLIJ346sw9FNM0KF7H1B_HAftAIkI",
+  authDomain: "ryzmusical.firebaseapp.com",
+  projectId: "ryzmusical",
+  storageBucket: "ryzmusical.firebasestorage.app",
+  messagingSenderId: "934193972979",
+  appId: "1:934193972979:web:a31ffe822e7d2e9fd8d986",
+  measurementId: "G-80WXWJD34L"
+};
+const FB_COLLECTION = "midi_songs";
+const NEW_WINDOW_MS = 12 * 60 * 60 * 1000;
+const PAGE_SIZE = 48;
+const HERO_COUNT = 5;
+const FB_APP_SRC = "https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js";
+const FB_STORE_SRC = "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js";
+const TONE_SRC = "https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.js";
+const MIDI_SRC = "https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js";
+const LOGO_URL = "https://raw.githubusercontent.com/pi-pop/ryz/main/ryz.png";
+const BASS_THRESHOLD_MIDI = 48;
+const MARQUEE_PAUSE_MS = 5000;
+const MARQUEE_SPEED = 40;
+const SONG_CACHE_MAX = 4;
+
+const TABS = [
+  {key: "ALL", label: "Semua"},
+  {key: "12", label: "12 Not"},
+  {key: "24", label: "24 Not"},
+  {key: "36", label: "36 Not"},
+  {key: "48", label: "48 Not"},
+  {key: "54", label: "54 Not"},
+  {key: "60", label: "60 Not"},
+  {key: "72", label: "72 Not"}
+];
+
+const grid = document.getElementById("nadaGrid");
+const tabRow = document.getElementById("tabRow");
+const resultCount = document.getElementById("resultCount");
+const searchInput = document.getElementById("searchInput");
+const statTotal = document.getElementById("statTotal");
+const toastEl = document.getElementById("toast");
+const heroList = document.getElementById("heroList");
+const previewBar = document.getElementById("previewBar");
+const previewTitle = document.getElementById("previewTitle");
+const previewClose = document.getElementById("previewClose");
+const bigPlayBtn = document.getElementById("bigPlayBtn");
+const volSlider = document.getElementById("volSlider");
+const statusLabel = document.getElementById("statusLabel");
+const seekTrack = document.getElementById("seekTrack");
+const timeNow = document.getElementById("timeNow");
+const timeTotal = document.getElementById("timeTotal");
+const miniEq = document.getElementById("miniEq");
+const heroEq = document.getElementById("heroEq");
+const titleBox = document.getElementById("titleBox");
+
+const items = new Map();
+let catalog = [];
+let filtered = [];
+let renderedCount = 0;
+let activeTab = "ALL";
+let searchTerm = "";
+let dbState = "loading";
+let dbTimer = 0;
+let db = null;
+let unsubscribe = null;
+let retryTimer = 0;
+let retryCount = 0;
+let firebaseLoading = null;
+let serverReady = false;
+let refreshQueued = false;
+let expiryTimer = 0;
+let heroSignature = "";
+let heroIds = [];
+let catalogVersion = 0;
+let filterTerm = "";
+let filterVersion = -1;
+let filterTab = "";
+let gridSignature = "";
+let searchQueued = false;
+const songCache = new Map();
+
+let trebleSynth = null;
+let bassSynth = null;
+let currentSong = null;
+let currentSongId = null;
+let songDuration = 0;
+let startOffset = 0;
+let pausedAt = 0;
+let isPlaying = false;
+let playToken = 0;
+let seekRaf = 0;
+let seekDragging = false;
+let dragTime = 0;
+let lastPct = -1;
+let audioReady = null;
+let endLeaveTimer = 0;
+let marqueeToken = 0;
+let marqueeAnim = null;
+let marqueeActive = false;
+
+function buildWaLink(text){
+  return "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(text);
+}
+
+function escHtml(s){
+  const map = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"};
+  return String(s).replace(/[&<>"']/g, function(c){ return map[c]; });
+}
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600);
+}
+
+function base64ToBytes(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function stripExt(name){
+  return String(name || "").replace(/\.(mid|midi|ryz|mp3|wav|ogg|oga|m4a|aac|flac|opus|webm)$/i, "");
+}
+
+function parseCode(name){
+  const m = String(name || "").match(/^\s*(\d{5})(?!\d)/);
+  return m ? m[1] : "";
+}
+
+function detectNot(name, code){
+  if(code) return code.slice(0, 2);
+  const m = String(name || "").match(/(\d+)\s*NOT\b/i);
+  return m ? m[1] : "";
+}
+
+function toMillis(v){
+  if(!v) return 0;
+  if(typeof v.toMillis === "function") return v.toMillis();
+  if(typeof v === "number") return v;
+  const t = new Date(v).getTime();
+  return isFinite(t) ? t : 0;
+}
+
+function makeItem(id, data, fallbackAdded){
+  const n = stripExt(data.name);
+  const code = parseCode(n);
+  const l = n.toLowerCase();
+  const prev = items.get(id);
+  let addedAt = toMillis(data.addedAt);
+  if(!addedAt) addedAt = prev ? prev.addedAt : fallbackAdded;
+  return {
+    id: id,
+    n: n,
+    l: l,
+    c: detectNot(n, code),
+    key: (code ? "0" + code : "1") + l,
+    b64: data.type === "midi" && data.data ? data.data : null,
+    addedAt: addedAt
+  };
+}
+
+function isNew(item, now){
+  return item.addedAt > 0 && now - item.addedAt < NEW_WINDOW_MS;
+}
+
+function byKey(a, b){
+  return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+}
+
+function isNewer(a, b){
+  return a.addedAt !== b.addedAt ? a.addedAt > b.addedAt : a.key < b.key;
+}
+
+function latestItems(){
+  const top = [];
+  for(let i = 0; i < catalog.length; i++){
+    const it = catalog[i];
+    if(top.length === HERO_COUNT && !isNewer(it, top[top.length - 1])) continue;
+    let p = top.length;
+    while(p > 0 && isNewer(it, top[p - 1])) p--;
+    top.splice(p, 0, it);
+    if(top.length > HERO_COUNT) top.pop();
+  }
+  return top;
+}
+
+function scheduleRefresh(){
+  if(refreshQueued) return;
+  refreshQueued = true;
+  requestAnimationFrame(function(){
+    refreshQueued = false;
+    statTotal.textContent = catalog.length;
+    renderGrid(true);
+    renderHero();
+    scheduleNewExpiry();
+  });
+}
+
+function scheduleNewExpiry(){
+  clearTimeout(expiryTimer);
+  const now = Date.now();
+  let next = Infinity;
+  for(let i = 0; i < catalog.length; i++){
+    const at = catalog[i].addedAt;
+    if(!at) continue;
+    const left = at + NEW_WINDOW_MS - now;
+    if(left > 0 && left < next) next = left;
+  }
+  if(next === Infinity) return;
+  expiryTimer = setTimeout(scheduleRefresh, Math.min(next + 500, 2147000000));
+}
+
+function applySnapshot(snapshot){
+  if(snapshot.empty && snapshot.metadata.fromCache && !serverReady) return;
+  clearTimeout(dbTimer);
+  retryCount = 0;
+  dbState = "ready";
+  const fallback = serverReady ? Date.now() : 0;
+  const changes = snapshot.docChanges();
+  for(let i = 0; i < changes.length; i++){
+    const ch = changes[i];
+    songCache.delete(ch.doc.id);
+    if(ch.type === "removed"){
+      items.delete(ch.doc.id);
+      continue;
+    }
+    const data = ch.doc.data({serverTimestamps: "estimate"});
+    items.set(ch.doc.id, makeItem(ch.doc.id, data, ch.type === "added" ? fallback : 0));
+  }
+  if(!snapshot.metadata.fromCache) serverReady = true;
+  if(changes.length){
+    catalogVersion++;
+    catalog = Array.from(items.values()).sort(byKey);
+  }
+  scheduleRefresh();
+}
+
+function reloadFirebase(){
+  if(firebaseLoading) return;
+  firebaseLoading = loadScript(FB_APP_SRC)
+    .then(function(){ return loadScript(FB_STORE_SRC); })
+    .catch(function(){})
+    .then(function(){ firebaseLoading = null; });
+}
+
+function scheduleRetry(){
+  clearTimeout(retryTimer);
+  retryCount++;
+  retryTimer = setTimeout(startListening, Math.min(retryCount * 1000, 5000));
+}
+
+function startListening(){
+  clearTimeout(retryTimer);
+  clearTimeout(dbTimer);
+  if(unsubscribe){
+    unsubscribe();
+    unsubscribe = null;
+  }
+  try{
+    if(!db){
+      if(!window.firebase || !firebase.firestore){
+        if(retryCount >= 2) reloadFirebase();
+        throw new Error("firebase belum siap");
+      }
+      if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+      db.settings({experimentalAutoDetectLongPolling: true, cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, merge: true});
+      db.enablePersistence({synchronizeTabs: true}).catch(function(){});
+    }
+    unsubscribe = db.collection(FB_COLLECTION).onSnapshot(applySnapshot, function(err){
+      console.error("Firestore error:", err);
+      scheduleRetry();
+    });
+    dbTimer = setTimeout(function(){
+      if(dbState === "loading") startListening();
+    }, 12000);
+  }catch(e){
+    console.error(e);
+    scheduleRetry();
+  }
+}
+
+function connectDatabase(){
+  startListening();
+  window.addEventListener("online", function(){
+    if(dbState === "loading") startListening();
+  });
+  document.addEventListener("visibilitychange", function(){
+    if(!document.hidden && dbState === "loading") startListening();
+  });
+}
+
+function filterList(){
+  const term = searchTerm.trim().toLowerCase().replace(/\s+/g, " ");
+  const reusable = filterTerm !== "" && filterVersion === catalogVersion && filterTab === activeTab && term.indexOf(filterTerm) === 0;
+  const base = reusable ? filtered : catalog;
+  filterTerm = term;
+  filterVersion = catalogVersion;
+  filterTab = activeTab;
+  if(activeTab === "ALL" && !term) return catalog;
+  const tab = activeTab;
+  const tokens = term ? term.split(" ") : [];
+  return base.filter(function(item){
+    if(tab !== "ALL" && item.c !== tab) return false;
+    for(let i = 0; i < tokens.length; i++){
+      if(item.l.indexOf(tokens[i]) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function renderTabs(){
+  tabRow.innerHTML = TABS.map(function(t){
+    return '<button class="tab-btn' + (activeTab === t.key ? " active" : "") + '" type="button" data-tab="' + t.key + '">' + t.label + "</button>";
+  }).join("");
+}
+
+function cardHtml(item, now){
+  const playing = isPlaying && item.id === currentSongId;
+  const waText = "Halo admin RYZ TECH, saya mau pesan nada: " + item.n;
+  return (
+    '<div class="nada-card" data-id="' + escHtml(item.id) + '">' +
+      '<div class="top-row">' +
+        '<div class="name">' + escHtml(item.n) + "</div>" +
+        (isNew(item, now) ? '<span class="new-badge">NEW</span>' : "") +
+      "</div>" +
+      '<div class="card-actions">' +
+        '<a class="order-link" href="' + buildWaLink(waText) + '" target="_blank" rel="noopener">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>' +
+          "Pesan" +
+        "</a>" +
+        '<button class="preview-btn' + (playing ? " playing" : "") + '" type="button" data-action="preview"' + (item.b64 ? "" : " disabled") + ">" +
+          '<svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' +
+          '<svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>' +
+          '<span class="pv-label">' + (playing ? "Jeda" : "Dengar") + "</span>" +
+        "</button>" +
+      "</div>" +
+    "</div>"
+  );
+}
+
+function buildCards(from, to){
+  const now = Date.now();
+  let html = "";
+  for(let i = from; i < to; i++) html += cardHtml(filtered[i], now);
+  return html;
+}
+
+function rangeSignature(from, to, now){
+  let sig = "";
+  for(let i = from; i < to; i++){
+    const it = filtered[i];
+    sig += it.id + (isNew(it, now) ? "n" : "o") + (it.b64 ? "1" : "0") + it.n + "|";
+  }
+  return sig;
+}
+
+function renderGrid(keepScroll){
+  const prevTop = keepScroll ? grid.scrollTop : 0;
+  const keepCount = keepScroll ? Math.max(renderedCount, PAGE_SIZE) : PAGE_SIZE;
+  filtered = filterList();
+  if(!catalog.length){
+    renderedCount = 0;
+    resultCount.textContent = "";
+    const state = dbState === "loading" ? "skeleton" : "empty";
+    if(gridSignature !== state){
+      gridSignature = state;
+      grid.innerHTML = state === "skeleton" ? skeletonCardsHtml() : '<div class="empty-state">Belum ada nada di katalog.</div>';
+    }
+    return;
+  }
+  resultCount.textContent = filtered.length + " nada ditemukan";
+  if(!filtered.length){
+    renderedCount = 0;
+    if(gridSignature !== "nomatch"){
+      gridSignature = "nomatch";
+      grid.innerHTML = '<div class="empty-state">Gak ketemu nadanya, coba kata kunci lain atau chat admin buat request.</div>';
+    }
+    return;
+  }
+  const count = Math.min(keepCount, filtered.length);
+  const sig = rangeSignature(0, count, Date.now());
+  renderedCount = count;
+  if(sig !== gridSignature){
+    gridSignature = sig;
+    grid.innerHTML = buildCards(0, count);
+  }
+  grid.scrollTop = prevTop;
+}
+
+function rowHtml(item, index, animate, now){
+  const meta = item.c ? item.c + " NOT" : "Nada basuri";
+  return (
+    '<div class="stage-row' + (animate ? " enter" : "") + '" style="--i:' + index + '">' +
+      '<div class="stage-rank">' + (index + 1) + "</div>" +
+      '<div class="stage-info"><div class="stage-name">' + escHtml(item.n) + '</div><div class="stage-meta">' + escHtml(meta) + (isNew(item, now) ? '<span class="new-badge mini">NEW</span>' : "") + "</div></div>" +
+      '<button class="stage-play' + (isPlaying && item.id === currentSongId ? " is-playing" : "") + '" type="button" data-hero-play="' + escHtml(item.id) + '" aria-label="Dengar ' + escHtml(item.n) + '"' + (item.b64 ? "" : " disabled") + ">" +
+        '<svg class="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' +
+        '<svg class="ico-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>' +
+      "</button>" +
+    "</div>"
+  );
+}
+
+function skeletonCardsHtml(){
+  let html = "";
+  for(let i = 0; i < 8; i++){
+    html += '<div class="nada-card skel"><div class="bar"></div><div class="bar short"></div><div class="card-actions"><div class="bar tiny"></div><div class="pill"></div></div></div>';
+  }
+  return html;
+}
+
+function skeletonHtml(){
+  let html = "";
+  for(let i = 0; i < HERO_COUNT; i++){
+    html += '<div class="stage-row skel"><div class="stage-rank">0</div><div class="stage-info"><div class="bar"></div><div class="bar short"></div></div><div class="circle"></div></div>';
+  }
+  return html;
+}
+
+function renderHero(){
+  if(!catalog.length){
+    const sig = "state:" + dbState;
+    if(sig === heroSignature) return;
+    heroSignature = sig;
+    heroIds = [];
+    heroList.innerHTML = dbState === "loading" ? skeletonHtml() : '<div class="stage-empty">Belum ada nada.</div>';
+    return;
+  }
+  const now = Date.now();
+  const latest = latestItems();
+  const sig = latest.map(function(i){ return i.id + "|" + i.n + "|" + (isNew(i, now) ? 1 : 0) + (i.b64 ? 1 : 0); }).join(";");
+  if(sig === heroSignature) return;
+  const prev = new Set(heroIds);
+  const hadList = prev.size > 0;
+  heroSignature = sig;
+  heroIds = latest.map(function(i){ return i.id; });
+  heroList.innerHTML = latest.map(function(item, i){
+    return rowHtml(item, i, hadList && !prev.has(item.id), now);
+  }).join("");
+}
+
+function syncButtons(){
+  heroList.querySelectorAll("[data-hero-play]").forEach(function(b){
+    const active = isPlaying && b.getAttribute("data-hero-play") === currentSongId;
+    b.classList.toggle("is-playing", active);
+    b.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+  grid.querySelectorAll(".preview-btn.playing").forEach(function(b){ setCardButton(b, false); });
+  if(isPlaying && currentSongId){
+    const card = grid.querySelector('[data-id="' + CSS.escape(currentSongId) + '"]');
+    if(card) setCardButton(card.querySelector(".preview-btn"), true);
+  }
+}
+
+function setCardButton(btn, on){
+  if(!btn) return;
+  btn.classList.toggle("playing", on);
+  btn.querySelector(".pv-label").textContent = on ? "Jeda" : "Dengar";
+}
+
+function loadScript(src){
+  return new Promise(function(resolve, reject){
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    s.onload = resolve;
+    s.onerror = function(){ reject(new Error("load " + src)); };
+    document.head.appendChild(s);
+  });
+}
+
+function loadAudio(){
+  if(window.Tone && window.Midi) return Promise.resolve();
+  if(!audioReady){
+    audioReady = Promise.all([loadScript(TONE_SRC), loadScript(MIDI_SRC)]).catch(function(e){
+      audioReady = null;
+      throw e;
+    });
+  }
+  return audioReady;
+}
+
+function prefetchAudio(){
+  const run = function(){ loadAudio().catch(function(){}); };
+  if(typeof requestIdleCallback === "function") requestIdleCallback(run, {timeout: 3000});
+  else setTimeout(run, 1500);
+}
+
+function fmtTime(s){
+  if(!isFinite(s) || s < 0) s = 0;
+  return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+}
+
+function stopSeekTimer(){
+  if(seekRaf){
+    cancelAnimationFrame(seekRaf);
+    seekRaf = 0;
+  }
+}
+
+function buildSynth(volume){
+  const synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: {type: "square"},
+    envelope: {attack: 0.006, decay: 0.001, sustain: 1, release: 0.09},
+    volume: volume
+  }).toDestination();
+  synth.maxPolyphony = 18;
+  return synth;
+}
+
+function ensureSynths(){
+  if(!trebleSynth) trebleSynth = buildSynth(-16);
+  if(!bassSynth) bassSynth = buildSynth(-14);
+}
+
+function getCurrentTime(){
+  if(!isPlaying) return pausedAt;
+  return Math.min(songDuration, startOffset + Tone.Transport.seconds);
+}
+
+function updateSeek(){
+  const cur = seekDragging ? dragTime : getCurrentTime();
+  const pct = songDuration > 0 ? Math.min(100, Math.max(0, (cur / songDuration) * 100)) : 0;
+  if(pct !== lastPct){
+    lastPct = pct;
+    seekTrack.style.setProperty("--p", pct);
+  }
+  const nowText = fmtTime(cur);
+  const totalText = fmtTime(songDuration);
+  if(timeNow.textContent !== nowText) timeNow.textContent = nowText;
+  if(timeTotal.textContent !== totalText) timeTotal.textContent = totalText;
+}
+
+function startSeekTimer(){
+  stopSeekTimer();
+  const tick = function(){
+    updateSeek();
+    seekRaf = requestAnimationFrame(tick);
+  };
+  seekRaf = requestAnimationFrame(tick);
+}
+
+function stopPlayback(){
+  if(!window.Tone) return;
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+  if(trebleSynth) trebleSynth.releaseAll();
+  if(bassSynth) bassSynth.releaseAll();
+}
+
+function setPlayButtonState(playing){
+  bigPlayBtn.classList.toggle("is-playing", playing);
+  syncButtons();
+}
+
+function setEqState(playing){
+  [miniEq, heroEq].forEach(function(eq){
+    if(eq.classList.contains("paused") !== playing) return;
+    if(playing){
+      eq.classList.remove("paused");
+      return;
+    }
+    const bars = eq.children;
+    for(let i = 0; i < bars.length; i++) bars[i].style.transform = getComputedStyle(bars[i]).transform;
+    eq.classList.add("paused");
+    void eq.offsetWidth;
+    for(let i = 0; i < bars.length; i++) bars[i].style.transform = "";
+  });
+}
+
+function applyVolume(){
+  if(!window.Tone) return;
+  const v = Number(volSlider.value);
+  const muted = v <= Number(volSlider.min);
+  Tone.Destination.mute = muted;
+  if(!muted) Tone.Destination.volume.value = v;
+}
+
+function firstNoteIndex(notes, t){
+  let lo = 0;
+  let hi = notes.length;
+  while(lo < hi){
+    const mid = (lo + hi) >> 1;
+    if(notes[mid].t < t) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function prepareSong(item){
+  const cached = songCache.get(item.id);
+  if(cached){
+    songCache.delete(item.id);
+    songCache.set(item.id, cached);
+    return cached;
+  }
+  const midi = new Midi(base64ToBytes(item.b64).buffer);
+  const notes = [];
+  for(let t = 0; t < midi.tracks.length; t++){
+    const list = midi.tracks[t].notes;
+    for(let i = 0; i < list.length; i++){
+      const n = list[i];
+      notes.push({t: n.time, d: n.duration, n: n.name, v: n.velocity, bass: n.midi < BASS_THRESHOLD_MIDI});
+    }
+  }
+  notes.sort(function(a, b){ return a.t - b.t; });
+  const song = {notes: notes, duration: midi.duration};
+  songCache.set(item.id, song);
+  if(songCache.size > SONG_CACHE_MAX) songCache.delete(songCache.keys().next().value);
+  return song;
+}
+
+function scheduleNote(note, startAt){
+  Tone.Transport.schedule(function(time){
+    (note.bass ? bassSynth : trebleSynth).triggerAttackRelease(note.n, note.d, time, note.v);
+  }, note.t - startAt);
+}
+
+function openPlayer(){
+  previewBar.classList.add("show");
+  document.body.classList.add("player-open");
+}
+
+function setPausedUi(label){
+  stopMarquee();
+  setPlayButtonState(false);
+  setEqState(false);
+  statusLabel.textContent = label;
+}
+
+function stopMarquee(){
+  marqueeToken++;
+  marqueeActive = false;
+  if(marqueeAnim){
+    marqueeAnim.cancel();
+    marqueeAnim = null;
+  }
+  measureTitle();
+}
+
+function sleep(ms){
+  return new Promise(function(resolve){ setTimeout(resolve, ms); });
+}
+
+function nextFrame(){
+  return new Promise(function(resolve){ requestAnimationFrame(function(){ resolve(); }); });
+}
+
+function measureTitle(){
+  const boxW = titleBox.clientWidth;
+  const textW = previewTitle.offsetWidth;
+  const over = textW > boxW + 1;
+  titleBox.classList.toggle("overflowing", over);
+  return {boxW: boxW, textW: textW, over: over};
+}
+
+function playMarqueeSegment(keyframes, duration, easing, token){
+  const prev = marqueeAnim;
+  const anim = previewTitle.animate(keyframes, {duration: duration, easing: easing, fill: "forwards"});
+  marqueeAnim = anim;
+  if(prev) prev.cancel();
+  return anim.finished.then(function(){ return token === marqueeToken; }, function(){ return false; });
+}
+
+async function startMarquee(){
+  stopMarquee();
+  marqueeActive = true;
+  const token = marqueeToken;
+  if(typeof previewTitle.animate !== "function") return;
+  if(document.fonts && document.fonts.ready){
+    try{ await document.fonts.ready; }catch(e){}
+  }
+  await nextFrame();
+  if(token !== marqueeToken) return;
+  measureTitle();
+  while(token === marqueeToken){
+    await sleep(MARQUEE_PAUSE_MS);
+    if(token !== marqueeToken) return;
+    const m = measureTitle();
+    const exited = await playMarqueeSegment(
+      [{transform: "translateX(0px)"}, {transform: "translateX(" + (-m.textW) + "px)"}],
+      (m.textW / MARQUEE_SPEED) * 1000,
+      "linear",
+      token
+    );
+    if(!exited) return;
+    const entered = await playMarqueeSegment(
+      [{transform: "translateX(" + m.boxW + "px)"}, {transform: "translateX(0px)"}],
+      Math.max(400, (m.boxW / MARQUEE_SPEED) * 1000),
+      "linear",
+      token
+    );
+    if(!entered) return;
+  }
+}
+
+function cancelAutoHide(){
+  if(endLeaveTimer){
+    clearTimeout(endLeaveTimer);
+    endLeaveTimer = 0;
+  }
+  previewBar.classList.remove("leaving");
+}
+
+function closePlayer(){
+  playToken++;
+  cancelAutoHide();
+  stopPlayback();
+  stopMarquee();
+  isPlaying = false;
+  pausedAt = 0;
+  currentSong = null;
+  currentSongId = null;
+  songDuration = 0;
+  seekDragging = false;
+  seekTrack.classList.remove("dragging");
+  stopSeekTimer();
+  updateSeek();
+  setPlayButtonState(false);
+  setEqState(false);
+  previewBar.classList.remove("show");
+  document.body.classList.remove("player-open");
+}
+
+function hidePlayerAnimated(){
+  if(isPlaying || !previewBar.classList.contains("show")) return;
+  previewBar.classList.add("leaving");
+  endLeaveTimer = setTimeout(function(){
+    endLeaveTimer = 0;
+    closePlayer();
+  }, 800);
+}
+
+function onSongEnded(){
+  stopPlayback();
+  isPlaying = false;
+  pausedAt = 0;
+  stopSeekTimer();
+  setPausedUi("Selesai");
+  updateSeek();
+  cancelAutoHide();
+  hidePlayerAnimated();
+}
+
+function startPlayback(startAt){
+  cancelAutoHide();
+  stopPlayback();
+  Tone.Transport.position = 0;
+  const notes = currentSong.notes;
+  for(let i = firstNoteIndex(notes, startAt); i < notes.length; i++) scheduleNote(notes[i], startAt);
+  Tone.Transport.scheduleOnce(function(time){
+    Tone.Draw.schedule(onSongEnded, time);
+  }, Math.max(0, songDuration - startAt) + 0.5);
+  startOffset = startAt;
+  isPlaying = true;
+  Tone.Transport.start();
+  setPlayButtonState(true);
+  setEqState(true);
+  statusLabel.textContent = "Now playing";
+  startSeekTimer();
+  if(!marqueeActive) startMarquee();
+}
+
+async function playSong(item){
+  const token = ++playToken;
+  cancelAutoHide();
+  stopPlayback();
+  isPlaying = false;
+  stopSeekTimer();
+  seekDragging = false;
+  seekTrack.classList.remove("dragging");
+  currentSong = null;
+  currentSongId = item.id;
+  songDuration = 0;
+  pausedAt = 0;
+  setPausedUi("Menyiapkan...");
+  previewTitle.textContent = item.n;
+  openPlayer();
+  measureTitle();
+  updateSeek();
+  const unlock = window.Tone && window.Midi ? Tone.start() : loadAudio().then(function(){ return Tone.start(); });
+  try{
+    await unlock;
+    await nextFrame();
+    if(token !== playToken) return;
+    ensureSynths();
+    const song = prepareSong(item);
+    applyVolume();
+    currentSong = song;
+    songDuration = song.duration;
+    startPlayback(0);
+    updateSeek();
+  }catch(e){
+    if(token === playToken){
+      setPausedUi("Gagal memutar file ini.");
+      showToast("Gagal memutar nada ini.");
+    }
+  }
+}
+
+async function togglePlayback(){
+  if(!currentSong) return;
+  if(isPlaying){
+    pausedAt = getCurrentTime();
+    stopPlayback();
+    isPlaying = false;
+    stopSeekTimer();
+    setPausedUi("Paused");
+    updateSeek();
+    return;
+  }
+  const token = playToken;
+  try{
+    await Tone.start();
+  }catch(e){
+    return;
+  }
+  if(token !== playToken || !currentSong) return;
+  startPlayback(pausedAt);
+}
+
+async function handlePreviewClick(item, btn){
+  if(!item.b64){
+    showToast("Nada ini belum ada file MIDI-nya.");
+    return;
+  }
+  if(item.id === currentSongId && currentSong){
+    togglePlayback();
+    return;
+  }
+  btn.classList.add("is-loading");
+  try{
+    await playSong(item);
+  }catch(e){
+    showToast("Gagal memuat nada ini.");
+  }finally{
+    btn.classList.remove("is-loading");
+  }
+}
+
+grid.addEventListener("click", function(e){
+  const btn = e.target.closest("[data-action='preview']");
+  if(!btn) return;
+  const card = btn.closest(".nada-card");
+  const item = card && items.get(card.getAttribute("data-id"));
+  if(item) handlePreviewClick(item, btn);
+});
+
+grid.addEventListener("scroll", function(){
+  if(renderedCount === 0 || renderedCount >= filtered.length) return;
+  if(grid.scrollTop + grid.clientHeight < grid.scrollHeight - 320) return;
+  const next = Math.min(renderedCount + PAGE_SIZE, filtered.length);
+  gridSignature += rangeSignature(renderedCount, next, Date.now());
+  grid.insertAdjacentHTML("beforeend", buildCards(renderedCount, next));
+  renderedCount = next;
+}, {passive: true});
+
+heroList.addEventListener("click", function(e){
+  const btn = e.target.closest("[data-hero-play]");
+  if(!btn) return;
+  const item = items.get(btn.getAttribute("data-hero-play"));
+  if(item) handlePreviewClick(item, btn);
+});
+
+tabRow.addEventListener("click", function(e){
+  const btn = e.target.closest(".tab-btn");
+  if(!btn) return;
+  activeTab = btn.getAttribute("data-tab");
+  tabRow.querySelectorAll(".tab-btn").forEach(function(b){
+    b.classList.toggle("active", b === btn);
+  });
+  renderGrid(false);
+});
+
+searchInput.addEventListener("input", function(){
+  searchTerm = searchInput.value;
+  if(searchQueued) return;
+  searchQueued = true;
+  requestAnimationFrame(function(){
+    searchQueued = false;
+    renderGrid(false);
+  });
+});
+
+bigPlayBtn.addEventListener("click", togglePlayback);
+let dragState = null;
+let playerOffsetX = 0;
+let playerOffsetY = 0;
+const DISMISS_OPACITY = 0.12;
+
+function clampPlayerOffset(){
+  const cs = getComputedStyle(previewBar);
+  const w = previewBar.offsetWidth;
+  const h = previewBar.offsetHeight;
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  const baseLeft = vw - parseFloat(cs.right) - w;
+  const baseTop = vh - parseFloat(cs.bottom) - h;
+  const margin = 8;
+  playerOffsetX = Math.min(Math.max(playerOffsetX, margin - baseLeft), vw - margin - w - baseLeft);
+  playerOffsetY = Math.min(Math.max(playerOffsetY, margin - baseTop), vh - margin - h - baseTop);
+  previewBar.style.translate = playerOffsetX + "px " + playerOffsetY + "px";
+}
+
+function applyDragOffset(){
+  previewBar.style.translate = playerOffsetX + "px " + playerOffsetY + "px";
+  const rect = previewBar.getBoundingClientRect();
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  const outX = Math.max(0, -rect.left) + Math.max(0, rect.right - vw);
+  const outY = Math.max(0, -rect.top) + Math.max(0, rect.bottom - vh);
+  const outside = Math.max(outX / rect.width, outY / rect.height);
+  previewBar.style.opacity = String(Math.max(0.08, 1 - 0.92 * Math.min(1, outside / 0.6)));
+}
+
+function endDrag(e){
+  if(!dragState || e.pointerId !== dragState.id) return;
+  dragState = null;
+  previewBar.classList.remove("dragging");
+  try{ previewBar.releasePointerCapture(e.pointerId); }catch(err){}
+  const opacity = parseFloat(previewBar.style.opacity || "1");
+  if(opacity <= DISMISS_OPACITY){
+    closePlayer();
+    previewBar.style.opacity = "";
+    setTimeout(function(){
+      if(!previewBar.classList.contains("show")) clampPlayerOffset();
+    }, 700);
+    return;
+  }
+  previewBar.classList.add("settling");
+  clampPlayerOffset();
+  previewBar.style.opacity = "";
+  setTimeout(function(){ previewBar.classList.remove("settling"); }, 350);
+}
+
+previewBar.addEventListener("pointerdown", function(e){
+  if(!previewBar.classList.contains("show") || previewBar.classList.contains("leaving")) return;
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  if(e.target.closest("button,input,a,.seek-track")) return;
+  dragState = {id: e.pointerId, x: e.clientX, y: e.clientY, ox: playerOffsetX, oy: playerOffsetY};
+  previewBar.classList.remove("settling");
+  previewBar.classList.add("dragging");
+  try{ previewBar.setPointerCapture(e.pointerId); }catch(err){}
+});
+
+previewBar.addEventListener("pointermove", function(e){
+  if(!dragState || e.pointerId !== dragState.id) return;
+  playerOffsetX = dragState.ox + e.clientX - dragState.x;
+  playerOffsetY = dragState.oy + e.clientY - dragState.y;
+  applyDragOffset();
+});
+
+previewBar.addEventListener("pointerup", endDrag);
+previewBar.addEventListener("pointercancel", endDrag);
+
+window.addEventListener("resize", function(){
+  if(!dragState && (playerOffsetX || playerOffsetY)) clampPlayerOffset();
+});
+
+previewClose.addEventListener("click", closePlayer);
+
+volSlider.addEventListener("input", function(){
+  applyVolume();
+});
+
+function timeFromPointer(e){
+  const rect = seekTrack.getBoundingClientRect();
+  const inner = rect.width - 4 - 18;
+  if(inner <= 0 || !songDuration) return 0;
+  const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left - 2 - 9) / inner));
+  return ratio * songDuration;
+}
+
+function finishSeek(e, commit){
+  if(!seekDragging) return;
+  seekDragging = false;
+  seekTrack.classList.remove("dragging");
+  try{ seekTrack.releasePointerCapture(e.pointerId); }catch(err){}
+  if(commit && currentSong && songDuration){
+    if(isPlaying) startPlayback(dragTime);
+    else pausedAt = dragTime;
+  }
+  updateSeek();
+}
+
+seekTrack.addEventListener("pointerdown", function(e){
+  if(!currentSong || !songDuration) return;
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  e.preventDefault();
+  seekDragging = true;
+  dragTime = timeFromPointer(e);
+  seekTrack.classList.add("dragging");
+  try{ seekTrack.setPointerCapture(e.pointerId); }catch(err){}
+  cancelAutoHide();
+  updateSeek();
+});
+
+seekTrack.addEventListener("pointermove", function(e){
+  if(!seekDragging) return;
+  dragTime = timeFromPointer(e);
+  updateSeek();
+});
+
+seekTrack.addEventListener("pointerup", function(e){ finishSeek(e, true); });
+seekTrack.addEventListener("pointercancel", function(e){ finishSeek(e, false); });
+
+function initLogos(){
+  const boxes = document.querySelectorAll("[data-logo]");
+  const probe = new Image();
+  probe.onload = function(){
+    boxes.forEach(function(box){
+      box.querySelector(".ryz-logo").style.backgroundImage = 'url("' + LOGO_URL + '")';
+      box.classList.add("logo-ready");
+    });
+  };
+  probe.onerror = function(){
+    boxes.forEach(function(box){ box.classList.remove("logo-ready"); });
+  };
+  probe.src = LOGO_URL;
+}
+
+function isField(node){
+  const el = node && node.nodeType === 1 ? node : node && node.parentElement;
+  return !!(el && el.closest && el.closest("input,textarea"));
+}
+
+function protectContent(){
+  ["copy", "cut", "dragstart", "contextmenu"].forEach(function(name){
+    document.addEventListener(name, function(e){ e.preventDefault(); });
+  });
+  document.addEventListener("selectstart", function(e){
+    if(!isField(e.target)) e.preventDefault();
+  });
+  document.addEventListener("keydown", function(e){
+    if(!(e.ctrlKey || e.metaKey)) return;
+    const k = String(e.key).toLowerCase();
+    if(k === "c" || k === "x" || k === "insert") e.preventDefault();
+    if(k === "a" && !isField(e.target)) e.preventDefault();
+  });
+  document.addEventListener("selectionchange", function(){
+    const sel = window.getSelection();
+    if(sel && !sel.isCollapsed && !isField(document.activeElement)) sel.removeAllRanges();
+  });
+}
+
+function initBrandStrip(){
+  const track = document.querySelector(".brand-strip .track");
+  const group = track.firstElementChild;
+  const build = function(){
+    while(track.children.length > 1) track.lastElementChild.remove();
+    const w = group.getBoundingClientRect().width;
+    if(!w) return;
+    const copies = Math.ceil(track.parentElement.clientWidth / w) + 1;
+    for(let i = 0; i < copies; i++){
+      const clone = group.cloneNode(true);
+      clone.setAttribute("aria-hidden", "true");
+      track.appendChild(clone);
+    }
+    track.style.setProperty("--strip-shift", -w + "px");
+    track.style.animationDuration = (w / 70) + "s";
+  };
+  build();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+  let queued = false;
+  window.addEventListener("resize", function(){
+    if(queued) return;
+    queued = true;
+    requestAnimationFrame(function(){
+      queued = false;
+      build();
+    });
+  });
+}
+
+function init(){
+  protectContent();
+  initLogos();
+  renderTabs();
+  renderGrid(false);
+  renderHero();
+  connectDatabase();
+  prefetchAudio();
+  initBrandStrip();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
